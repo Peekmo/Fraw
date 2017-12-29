@@ -1,0 +1,7 @@
+[package]
+name = "hello_world"
+version = "0.1.0"
+authors = ["Axel Anceau <axel.anceau@gmail.com>"]
+
+[dependencies]
+fraw = { path = "../.." }
