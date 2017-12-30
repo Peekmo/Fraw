@@ -1,8 +1,6 @@
-#[macro_use]
 extern crate stdweb;
 
 use stdweb::web::document;
-use stdweb::web::Element;
 use stdweb::web::INode;
 
 pub mod html;

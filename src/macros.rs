@@ -20,6 +20,13 @@ macro_rules! view {
     ($dom:ident ()) => {
         $dom.pop().unwrap()
     };
+    ($dom:ident ({ $expr:expr } $($tree:tt)*)) => {
+        let mut last_tag = $dom.pop().unwrap();
+        last_tag.set_inner_html($expr);
+        $dom.push(last_tag);
+
+        view! { $dom($($tree)*) }
+    };
     ($($tree:tt)*) => {{
         let mut dom = Vec::new();
         view! { dom($($tree)*) }
