@@ -9,12 +9,14 @@ pub mod macros;
 use html::Tag;
 
 /// Init everything !
-pub fn init_program(selector: &str, root: Tag) {
+pub fn init_program(selector: &str, root: &Tag) {
     stdweb::initialize();
 
     match document().query_selector(selector) {
         None => panic!("No selector {} found", selector),
-        Some(element) => element.append_child(&root.render()),
+        Some(element) => {
+            element.append_child(&root.render());
+        }
     };
 
     stdweb::event_loop();

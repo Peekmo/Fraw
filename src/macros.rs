@@ -17,7 +17,7 @@ macro_rules! view {
     };
     // Text nodes (expr)
     ($dom:ident, $nodes:ident ({ $expr:expr } $($tree:tt)*)) => {
-        $crate::macros::add_text(&mut $nodes, $expr);
+        $crate::macros::Expression::process($expr, &mut $nodes);
 
         view! { $dom, $nodes($($tree)*) }
     };
@@ -27,7 +27,7 @@ macro_rules! view {
             panic!("Your view must only contains one root node");
         }
 
-        $dom.pop().unwrap()
+        &$dom.pop().unwrap()
     };
     // Init
     ($($tree:tt)*) => {{
@@ -68,6 +68,38 @@ pub fn add_text(nodes: &mut Vec<Tag>, expr: &'static str) {
         Some(mut last_tag) => {
             last_tag.set_inner_html(expr);
             nodes.push(last_tag);
+        }
+    }
+}
+
+/// Expression parsed in template
+pub trait Expression {
+    /// Process the expression
+    fn process(&self, nodes: &mut Vec<Tag>);
+}
+
+/// Text node
+impl Expression for str {
+    fn process(&self, nodes: &mut Vec<Tag>) {
+        match nodes.pop() {
+            None => panic!("Can't write expression outside a tag"),
+            Some(mut last_tag) => {
+                last_tag.set_inner_html(self);
+                nodes.push(last_tag);
+            }
+        }
+    }
+}
+
+/// Subtemplate
+impl Expression for Tag {
+    fn process(&self, nodes: &mut Vec<Tag>) {
+        match nodes.pop() {
+            None => panic!("Can't write expression outside a tag"),
+            Some(mut last_tag) => {
+                last_tag.add_child(self.clone());
+                nodes.push(last_tag);
+            }
         }
     }
 }

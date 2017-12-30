@@ -11,6 +11,9 @@ fn main() {
                 <a>{ "ok ok" }</a>
             </p>
             <p></p>
+            <div>{ view! {
+                <div>{ "View inside a view" }</div>
+            } }</div>
         </div> 
     });
 }
