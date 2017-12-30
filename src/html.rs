@@ -4,7 +4,7 @@ use stdweb::web::INode;
 
 /// HTML Tag
 pub struct Tag {
-    tag: &'static str,
+    pub tag: &'static str,
     children: Vec<Tag>,
     inner_html: Option<String>
 }
@@ -35,10 +35,18 @@ impl Tag {
     }
 
     pub fn set_inner_html(&mut self, text: &'static str) {
+        if self.children.len() > 0 {
+            panic!("Impossible to add expression to a node with children ({})", text);    
+        }
+
         self.inner_html = Some(text.to_string());
     }
 
     pub fn add_child(&mut self, tag: Tag) {
+        if let Some(ref text) = self.inner_html {
+            panic!("Impossible to add children to a node with expression ({})", text);    
+        }
+
         self.children.push(tag);
     }
 }
