@@ -6,6 +6,7 @@ use stdweb::web::Element;
 use stdweb::web::INode;
 
 pub mod html;
+pub mod macros;
 
 use html::Tag;
 
