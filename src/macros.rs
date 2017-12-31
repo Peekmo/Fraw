@@ -1,4 +1,5 @@
 use html::Tag;
+use COMPONENTS;
 
 #[macro_export]
 macro_rules! view { 
@@ -13,13 +14,7 @@ macro_rules! view {
     // Closing tag
     ($dom:ident, $nodes:ident (</ $end:ident > $($tree:tt)*)) => {
         let tag_str = stringify!($end);
-
-        if let Some(component) = $crate::COMPONENTS.lock().unwrap().get(&String::from(tag_str)) {
-            $nodes.pop(); // Remove component markup
-            $crate::macros::Expression::process(&component.render(), &mut $nodes);
-        } else {
-            $crate::macros::close_tag(&mut $nodes, &mut $dom, tag_str);    
-        }
+        $crate::macros::close_tag(&mut $nodes, &mut $dom, tag_str);    
 
         view! { $dom, $nodes($($tree)*) }
     };
@@ -59,10 +54,18 @@ pub fn close_tag(nodes: &mut Vec<Tag>, dom: &mut Vec<Tag>, tag: &'static str) {
                panic!("Closing tag '{}' does not match the opening tag '{}'", tag, last_tag.tag)
            }
 
-           if !nodes.is_empty() {
-               nodes.last_mut().unwrap().add_child(last_tag);
-           } else {
-               dom.push(last_tag);
+           // Check for component
+           match COMPONENTS.lock().unwrap().get(&String::from(tag)) {
+               Some(component) => {
+                   Expression::process(&component.render(), nodes);
+               },
+               None => {
+                   if !nodes.is_empty() {
+                       nodes.last_mut().unwrap().add_child(last_tag);
+                   } else {
+                       dom.push(last_tag);
+                   }        
+               }
            }
        }
     }
