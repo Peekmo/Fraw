@@ -4,14 +4,22 @@ use html::Tag;
 macro_rules! view { 
     // Opening tag
     ($dom:ident, $nodes:ident (< $start:ident > $($tree:tt)*)) => {
-        let tag = $crate::html::Tag::new(stringify!($start));
+        let tag_str = stringify!($start);
+        let tag = $crate::html::Tag::new(tag_str);
         $nodes.push(tag);
 
         view! { $dom, $nodes($($tree)*) }
     };
     // Closing tag
     ($dom:ident, $nodes:ident (</ $end:ident > $($tree:tt)*)) => {
-        $crate::macros::close_tag(&mut $nodes, &mut $dom, stringify!($end));    
+        let tag_str = stringify!($end);
+
+        if let Some(component) = $crate::COMPONENTS.lock().unwrap().get(&String::from(tag_str)) {
+            $nodes.pop(); // Remove component markup
+            $crate::macros::Expression::process(&component.render(), &mut $nodes);
+        } else {
+            $crate::macros::close_tag(&mut $nodes, &mut $dom, tag_str);    
+        }
 
         view! { $dom, $nodes($($tree)*) }
     };
@@ -27,7 +35,7 @@ macro_rules! view {
             panic!("Your view must only contains one root node");
         }
 
-        &$dom.pop().unwrap()
+        $dom.pop().unwrap()
     };
     // Init
     ($($tree:tt)*) => {{
@@ -57,18 +65,6 @@ pub fn close_tag(nodes: &mut Vec<Tag>, dom: &mut Vec<Tag>, tag: &'static str) {
                dom.push(last_tag);
            }
        }
-    }
-}
-
-#[doc(hidden)]
-// Adds text to a node
-pub fn add_text(nodes: &mut Vec<Tag>, expr: &'static str) {
-    match nodes.pop() {
-        None => panic!("Can't write expression outside a tag"),
-        Some(mut last_tag) => {
-            last_tag.set_inner_html(expr);
-            nodes.push(last_tag);
-        }
     }
 }
 
