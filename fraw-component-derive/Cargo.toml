@@ -1,0 +1,12 @@
+[package]
+name = "fraw-component-derive"
+version = "0.1.0"
+authors = ["Peekmo <axel.anceau@gmail.com>"]
+
+[dependencies]
+syn = "0.11.11"
+quote = "0.3.15"
+lazy_static = "1.0"
+
+[lib]
+proc-macro = true

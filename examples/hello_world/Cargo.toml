@@ -5,3 +5,4 @@ authors = ["Axel Anceau <axel.anceau@gmail.com>"]
 
 [dependencies]
 fraw = { path = "../.." }
+fraw-component-derive = { path = "../../fraw-component-derive" }
