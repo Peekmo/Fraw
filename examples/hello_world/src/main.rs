@@ -12,6 +12,7 @@ use fraw::COMPONENTS;
 pub mod components;
 
 #[derive(FrawComponent)]
+#[fraw(dependency = "::components::MySecondCmp")]
 struct MyCmp {}
 impl Component for MyCmp {
     fn render(&self) -> Tag {
