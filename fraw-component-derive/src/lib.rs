@@ -40,6 +40,14 @@ fn impl_component(ast: &syn::DeriveInput) -> quote::Tokens {
         }
     }
     
+    // Suppress warning about mut when there's no element
+    let declaration_dependencies = if dependencies.len() > 0 {
+        quote! { let mut dependencies_mapping }
+    } else {
+        quote! { let dependencies_mapping }
+    };
+
+    // Bug if directly in final "quote!"
     let dependencies_type = quote! { 
         ::std::collections::HashMap<
             String, 
@@ -47,13 +55,14 @@ fn impl_component(ast: &syn::DeriveInput) -> quote::Tokens {
     > };
 
     quote! {
+        #[allow(dead_code)]
         impl #name {
             pub fn name() -> String {
                 String::from("name")
             }
 
             pub fn dependencies() -> #dependencies_type {
-                let mut dependencies_mapping: #dependencies_type = ::std::collections::HashMap::new();
+                #declaration_dependencies: #dependencies_type = ::std::collections::HashMap::new();
                 
                 #(#dependencies)*
 
