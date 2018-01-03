@@ -2,14 +2,11 @@ extern crate stdweb;
 
 use stdweb::web::document;
 use stdweb::web::INode;
-use std::collections::HashMap;
-use std::sync::Mutex;
 
 pub mod html;
 pub mod macros;
 pub mod component;
 
-use html::Tag;
 use component::FrawComponent;
 
 /// Init everything !

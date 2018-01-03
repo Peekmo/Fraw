@@ -10,8 +10,11 @@ use fraw::html::Tag;
 
 pub mod components;
 
+#[derive(Default)]
 #[derive(FrawComponent)]
-#[fraw(dependency = "::components::MySecondCmp")]
+#[fraw_selector = "mycmp"]
+#[fraw_dependency = "::components::MySecondCmp"]
+#[fraw_dependency(dep = "::components::MyThirdCmp", selector = "mycustomthirdcmp")]
 struct MyCmp {}
 impl Component for MyCmp {
     fn render(&self) -> Tag {
@@ -19,6 +22,8 @@ impl Component for MyCmp {
             <div>
                 <p>{ "View MyCmp" }</p>
                 <mysecondcmp></mysecondcmp>    
+                <mycustomthirdcmp></mycustomthirdcmp>    
+                <mythirdcmp></mythirdcmp>    
             </div>
         } }
     }
