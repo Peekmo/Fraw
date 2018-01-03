@@ -6,16 +6,23 @@ macro_rules! view {
     // Opening tag
     ($component:ident, $dom:ident, $nodes:ident (< $start:ident > $($tree:tt)*)) => {
         let tag_str = stringify!($start);
-        let tag = $crate::html::Tag::new(tag_str);
-        $nodes.push(tag);
+
+        match $crate::TAG_ALIASES.lock().unwrap().get(&tag_str) {
+            Some(alias) => $nodes.push($crate::html::Tag::new(alias)),
+            None => $nodes.push($crate::html::Tag::new(tag_str))
+        }
 
         view! { $component, $dom, $nodes($($tree)*) }
     };
     // Closing tag
     ($component:ident, $dom:ident, $nodes:ident (</ $end:ident > $($tree:tt)*)) => {
         let tag_str = stringify!($end);
-        $crate::macros::close_tag($component, &mut $nodes, &mut $dom, tag_str);    
 
+        match $crate::TAG_ALIASES.lock().unwrap().get(&tag_str) {
+            Some(alias) => $crate::macros::close_tag($component, &mut $nodes, &mut $dom, alias),
+            None => $crate::macros::close_tag($component, &mut $nodes, &mut $dom, tag_str)
+        }
+        
         view! { $component, $dom, $nodes($($tree)*) }
     };
     // Text nodes (expr)

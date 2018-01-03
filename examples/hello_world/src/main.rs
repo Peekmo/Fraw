@@ -4,7 +4,7 @@ extern crate fraw;
 #[macro_use]
 extern crate fraw_component_derive;
 
-use fraw::init_program;
+use fraw::Fraw;
 use fraw::component::Component;
 use fraw::html::Tag;
 
@@ -21,8 +21,10 @@ impl Component for MyCmp {
         view! { (self) => {
             <div>
                 <p>{ "View MyCmp" }</p>
+                <my_test></my_test>
                 <mysecondcmp></mysecondcmp>    
                 <mycustomthirdcmp></mycustomthirdcmp>    
+                <test_alias_cmp></test_alias_cmp>    
                 <mythirdcmp></mythirdcmp>    
             </div>
         } }
@@ -30,5 +32,10 @@ impl Component for MyCmp {
 }
 
 fn main() {
-    init_program("body", Box::new(MyCmp{}));
+    Fraw::register_alias("my_test", "my-test");
+    Fraw::register_alias("test_alias_cmp", "mysecondcmp");
+
+    let fraw = Fraw::init("body", Box::new(MyCmp{}));
+
+    fraw.run();
 }
