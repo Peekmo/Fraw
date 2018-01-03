@@ -51,17 +51,17 @@ fn impl_component(ast: &syn::DeriveInput) -> quote::Tokens {
     let dependencies_type = quote! { 
         ::std::collections::HashMap<
             String, 
-            ::std::boxed::Box<::fraw::component::Component>
+            ::std::boxed::Box<::fraw::component::FrawComponent>
     > };
 
     quote! {
         #[allow(dead_code)]
-        impl #name {
-            pub fn name() -> String {
-                String::from("name")
+        impl ::fraw::component::FrawComponent for #name {
+            fn name() -> String {
+                String::from("mysecondcmp")
             }
 
-            pub fn dependencies() -> #dependencies_type {
+            fn dependencies(&self) -> #dependencies_type {
                 #declaration_dependencies: #dependencies_type = ::std::collections::HashMap::new();
                 
                 #(#dependencies)*
@@ -69,7 +69,7 @@ fn impl_component(ast: &syn::DeriveInput) -> quote::Tokens {
                 dependencies_mapping
             }
 
-            pub fn build() -> Self {
+            fn build() -> Self {
                 #name{}
             }
         }

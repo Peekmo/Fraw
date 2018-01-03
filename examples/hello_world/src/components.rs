@@ -5,8 +5,8 @@ use fraw::html::Tag;
 pub struct MySecondCmp {}
 impl Component for MySecondCmp {
     fn render(&self) -> Tag {
-        view! {
+        view! { (self) => {
             <div>{ "View MySecondCmp" }</div>
-        }
+        } }  
     }
 }
