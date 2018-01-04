@@ -32,9 +32,15 @@ macro_rules! view {
         
         view! { $component, $dom, $nodes($($tree)*) }
     };
-    // Text nodes (expr) + closing tag
+    // Text nodes (expr)
     ($component:ident, $dom:ident, $nodes:ident ({ $expr:expr } $($tree:tt)*)) => {
         $crate::macros::Expression::process($expr, &mut $nodes);
+
+        view! { $component, $dom, $nodes($($tree)*) }
+    };
+    // Attribute
+    ($component:ident, $dom:ident, $nodes:ident ($key:ident = $value:tt $($tree:tt)*)) => {
+        $crate::macros::add_attribute($component, &mut $nodes, stringify!($key), $value);
 
         view! { $component, $dom, $nodes($($tree)*) }
     };
@@ -102,6 +108,17 @@ pub fn close_tag(component: &FrawComponent, nodes: &mut Vec<Tag>, dom: &mut Vec<
     }
 }
 
+/// Adds attribute to a tag 
+pub fn add_attribute(component: &FrawComponent, nodes: &mut Vec<Tag>, key: &str, value: &str) {
+    match nodes.last_mut() {
+        None => panic!("Trying to add attribute outside tags (component {})", component.name()),
+        Some(last_tag) => {
+            println!("{:?}", last_tag);
+            last_tag.add_attribute(key, value);
+        }
+    } 
+}
+
 /// Expression parsed in template
 pub trait Expression {
     /// Process the expression
@@ -111,11 +128,10 @@ pub trait Expression {
 /// Text node
 impl Expression for str {
     fn process(&self, nodes: &mut Vec<Tag>) {
-        match nodes.pop() {
+        match nodes.last_mut() {
             None => panic!("Can't write expression outside a tag"),
-            Some(mut last_tag) => {
+            Some(last_tag) => {
                 last_tag.set_inner_html(self);
-                nodes.push(last_tag);
             }
         }
     }
@@ -124,11 +140,10 @@ impl Expression for str {
 /// Subtemplate
 impl Expression for Tag {
     fn process(&self, nodes: &mut Vec<Tag>) {
-        match nodes.pop() {
+        match nodes.last_mut() {
             None => panic!("Can't write expression outside a tag"),
-            Some(mut last_tag) => {
+            Some(last_tag) => {
                 last_tag.add_child(self.clone());
-                nodes.push(last_tag);
             }
         }
     }

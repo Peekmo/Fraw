@@ -1,5 +1,4 @@
-extern crate stdweb;
-
+#[macro_use] extern crate stdweb;
 #[macro_use] extern crate lazy_static;
 
 use std::collections::HashMap;
