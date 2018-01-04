@@ -3,4 +3,5 @@ target
 Cargo.lock
 *.swp
 *.swo
-cordova
+node_modules
+platforms

@@ -1,0 +1,8 @@
+[package]
+name = "ionic4"
+version = "0.1.0"
+authors = ["Axel Anceau <axel.anceau@gmail.com>"]
+
+[dependencies]
+fraw = { path = "../../.." }
+fraw-component-derive = { path = "../../../fraw-component-derive" }
