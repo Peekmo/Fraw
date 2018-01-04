@@ -61,6 +61,9 @@ fn impl_component(ast: &syn::DeriveInput) -> quote::Tokens {
     // Component default selector
     let component_selector = extract_component_selector(&ast);
 
+    // Component full name
+    let component_name = name.as_ref();
+
     // Generated code
     quote! {
         #[allow(dead_code)]
@@ -77,6 +80,11 @@ fn impl_component(ast: &syn::DeriveInput) -> quote::Tokens {
                 #(#dependencies)*
 
                 dependencies_mapping
+            }
+
+            /// Returns component's name
+            fn name(&self) -> String {
+                String::from(#component_name)    
             }
 
             /// Build the component

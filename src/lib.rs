@@ -48,6 +48,7 @@ impl Fraw {
 
     /// Register an alias for a HTML tag
     /// Useful to use non allowed tag names (like `ion-header`) or to globally rename a component selector
+    /// Careful, everything is in lowercase
     pub fn register_alias(original: &'static str, alias: &'static str) {
         TAG_ALIASES.lock().unwrap().insert(original, alias);
     }

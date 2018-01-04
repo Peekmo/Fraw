@@ -23,7 +23,7 @@ impl Component for MyThirdCmp {
         view! { (self) => {
             <div>
                 <p>{ "View MyThirdCmp" }</p>
-                <mysecondcmp></mysecondcmp>
+                <mysecondcmp/>
             </div> 
         } }  
     }

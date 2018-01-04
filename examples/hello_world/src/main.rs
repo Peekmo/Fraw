@@ -22,10 +22,9 @@ impl Component for MyCmp {
             <div>
                 <p>{ "View MyCmp" }</p>
                 <my_test></my_test>
-                <mysecondcmp></mysecondcmp>    
-                <mycustomthirdcmp></mycustomthirdcmp>    
-                <test_alias_cmp></test_alias_cmp>    
-                <mythirdcmp></mythirdcmp>    
+                <mysecondcmp/>    
+                <mycustomthirdcmp/>   
+                <test_alias_cmp/> 
             </div>
         } }
     }

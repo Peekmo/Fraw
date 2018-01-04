@@ -1,10 +1,11 @@
 use html::Tag;
 use component::FrawComponent;
+use TAG_ALIASES;
 
 #[macro_export]
 macro_rules! view { 
     // Opening tag
-    ($component:ident, $dom:ident, $nodes:ident (< $start:ident > $($tree:tt)*)) => {
+    ($component:ident, $dom:ident, $nodes:ident (< $start:ident $($tree:tt)*)) => {
         let tag_str = stringify!($start);
 
         match $crate::TAG_ALIASES.lock().unwrap().get(&tag_str) {
@@ -14,18 +15,24 @@ macro_rules! view {
 
         view! { $component, $dom, $nodes($($tree)*) }
     };
+    // End opening tag
+    ($component:ident, $dom:ident, $nodes:ident (> $($tree:tt)*)) => {
+        view! { $component, $dom, $nodes($($tree)*) }
+    };
     // Closing tag
     ($component:ident, $dom:ident, $nodes:ident (</ $end:ident > $($tree:tt)*)) => {
         let tag_str = stringify!($end);
-
-        match $crate::TAG_ALIASES.lock().unwrap().get(&tag_str) {
-            Some(alias) => $crate::macros::close_tag($component, &mut $nodes, &mut $dom, alias),
-            None => $crate::macros::close_tag($component, &mut $nodes, &mut $dom, tag_str)
-        }
+        $crate::macros::close_tag($component, &mut $nodes, &mut $dom, Some(tag_str));
         
         view! { $component, $dom, $nodes($($tree)*) }
     };
-    // Text nodes (expr)
+    // Self closing tag
+    ($component:ident, $dom:ident, $nodes:ident (/> $($tree:tt)*)) => {
+        $crate::macros::close_tag($component, &mut $nodes, &mut $dom, None);
+        
+        view! { $component, $dom, $nodes($($tree)*) }
+    };
+    // Text nodes (expr) + closing tag
     ($component:ident, $dom:ident, $nodes:ident ({ $expr:expr } $($tree:tt)*)) => {
         $crate::macros::Expression::process($expr, &mut $nodes);
 
@@ -49,30 +56,37 @@ macro_rules! view {
 
         view! { $component, dom, nodes($($tree)*) }
     }};
-    // Init
+    // Init component
     ($($tree:tt)*) => {{
-        // Temporary nodes
-        let mut nodes = Vec::new();
-
-        // Final DOM
-        let mut dom = Vec::new();
-
-        view! { dom, nodes($($tree)*) }
+        view! { $($tree)* }
     }};
 }
 
 #[doc(hidden)]
 // When a closing tag is encountered, this method is triggered to modify the "$dom"
-pub fn close_tag(component: &FrawComponent, nodes: &mut Vec<Tag>, dom: &mut Vec<Tag>, tag: &'static str) {
+pub fn close_tag(component: &FrawComponent, nodes: &mut Vec<Tag>, dom: &mut Vec<Tag>, tag: Option<&'static str>) {
     match nodes.pop() {
-       None => panic!("More closing tags than opening tags '{}'", tag),
-       Some(last_tag) => {
-           if last_tag.tag != tag {
-               panic!("Closing tag '{}' does not match the opening tag '{}'", tag, last_tag.tag)
+       None => panic!("More closing tags than opening tags (component {})", component.name()),
+       Some(last_tag) => { 
+           let tag_name: &str;
+
+           match tag {
+               None => { tag_name = last_tag.tag; },
+               Some(tag_str) => {
+                   match TAG_ALIASES.lock().unwrap().get(tag_str) {
+                       Some(alias) => { tag_name = alias; },
+                       None => { tag_name = tag_str; } 
+                   }
+
+                   if last_tag.tag != tag_name {
+                       panic!("Closing tag '{}' does not match the opening tag '{}'", tag_name, last_tag.tag)
+                   }
+               }
            }
+           
 
            // Check for component
-           match component.dependencies().get(&String::from(tag)) {
+           match component.dependencies().get(&String::from(tag_name)) {
                Some(component) => {
                    Expression::process(&component.render(), nodes);
                },
