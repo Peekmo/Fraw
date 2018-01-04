@@ -21,13 +21,19 @@ impl Component for MyCmp {
         view! { (self) => {
             <div>
                 <p>{ "View MyCmp" }</p>
-                <my_test class="test" id="myid"></my_test>
-                <mysecondcmp/>    
+                <my_test class={ self.test().as_str() } id="myid"></my_test>
+                <mysecondcmp />    
                 <mycustomthirdcmp/>   
                 <test_alias_cmp/> 
             </div>
         } }
     }
+}
+
+impl MyCmp {
+    pub fn test(&self) -> String {
+        String::from("test_class")
+    } 
 }
 
 fn main() {
