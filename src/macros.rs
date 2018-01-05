@@ -82,7 +82,7 @@ macro_rules! fraw_state {
 pub fn close_tag(component: &FrawComponent, nodes: &mut Vec<Tag>, dom: &mut Vec<Tag>, tag: Option<&'static str>) {
     match nodes.pop() {
        None => panic!("More closing tags than opening tags (component {})", component.name()),
-       Some(last_tag) => { 
+       Some(mut last_tag) => { 
            let tag_name: &str;
 
            match tag {
@@ -103,15 +103,20 @@ pub fn close_tag(component: &FrawComponent, nodes: &mut Vec<Tag>, dom: &mut Vec<
            // Check for component
            match component.dependencies().get(&String::from(tag_name)) {
                Some(component) => {
+                   // Put the tag and remove it, in order to get the tag in the DOM
+                   nodes.push(last_tag);
+
                    Expression::process(&component.render(), nodes);
+
+                   last_tag = nodes.pop().unwrap();
                },
-               None => {
-                   if !nodes.is_empty() {
-                       nodes.last_mut().unwrap().add_child(last_tag);
-                   } else {
-                       dom.push(last_tag);
-                   }        
-               }
+               None => {}
+           }
+
+           if !nodes.is_empty() {
+               nodes.last_mut().unwrap().add_child(last_tag);
+           } else {
+               dom.push(last_tag);
            }
        }
     }
