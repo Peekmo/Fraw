@@ -21,7 +21,7 @@ impl Component for MyCmp {
         view! { (self) => {
             <div>
                 <p>{ "View MyCmp" }</p>
-                <my_test class={ self.test().as_str() } id="myid"></my_test>
+                <my_test checked={ true } class={ self.test().as_str() } id="myid"></my_test>
                 <mysecondcmp />    
                 <mycustomthirdcmp/>   
                 <test_alias_cmp/> 

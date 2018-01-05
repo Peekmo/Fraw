@@ -40,7 +40,7 @@ macro_rules! view {
     };
     // Attribute
     ($component:ident, $dom:ident, $nodes:ident ($key:ident = $value:tt $($tree:tt)*)) => {
-        $crate::macros::add_attribute($component, &mut $nodes, stringify!($key), $value);
+        $crate::macros::Attribute::process(&$value, $component, &mut $nodes, stringify!($key));
 
         view! { $component, $dom, $nodes($($tree)*) }
     };
@@ -108,17 +108,6 @@ pub fn close_tag(component: &FrawComponent, nodes: &mut Vec<Tag>, dom: &mut Vec<
     }
 }
 
-/// Adds attribute to a tag 
-pub fn add_attribute(component: &FrawComponent, nodes: &mut Vec<Tag>, key: &str, value: &str) {
-    match nodes.last_mut() {
-        None => panic!("Trying to add attribute outside tags (component {})", component.name()),
-        Some(last_tag) => {
-            println!("{:?}", last_tag);
-            last_tag.add_attribute(key, value);
-        }
-    } 
-}
-
 /// Expression parsed in template
 pub trait Expression {
     /// Process the expression
@@ -147,4 +136,36 @@ impl Expression for Tag {
             }
         }
     }
+}
+
+/// HTML attribute parser
+pub trait Attribute<'a> {
+    /// Parse attribute value
+    fn process(&'a self, component: &FrawComponent, nodes: &mut Vec<Tag>, key: &str); 
+}
+
+/// &str attribute
+impl<'a> Attribute<'a> for &'a str {
+    fn process(&'a self, component: &FrawComponent, nodes: &mut Vec<Tag>, key: &str) {
+        match nodes.last_mut() {
+            None => panic!("Trying to add attribute outside tags (component {})", component.name()),
+            Some(last_tag) => {
+                last_tag.add_attribute(key, self.clone());
+            }
+        }          
+    } 
+}
+
+/// bool attribute
+impl<'a> Attribute<'a> for bool {
+    fn process(&'a self, component: &FrawComponent, nodes: &mut Vec<Tag>, key: &str) {
+        match nodes.last_mut() {
+            None => panic!("Trying to add attribute outside tags (component {})", component.name()),
+            Some(last_tag) => {
+                if *self == true {
+                    last_tag.add_attribute(key, key);
+                }
+            }
+        }          
+    } 
 }
