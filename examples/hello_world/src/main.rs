@@ -15,13 +15,21 @@ pub mod components;
 #[fraw_selector = "mycmp"]
 #[fraw_dependency = "::components::MySecondCmp"]
 #[fraw_dependency(dep = "::components::MyThirdCmp", selector = "mycustomthirdcmp")]
-struct MyCmp {}
+struct MyCmp {
+    id: i32,
+    name: String
+}
 impl Component for MyCmp {
     fn render(&self) -> Tag {
         view! { (self) => {
             <div>
                 <p>{ "View MyCmp" }</p>
-                <my_test checked={ true } class={ self.test().as_str() } id="myid"></my_test>
+                <my_test 
+                    checked={ true } 
+                    class={ self.test().as_str() } 
+                    id={ self.id.to_string().as_str() }
+                    name="test"
+                ></my_test>
                 <mysecondcmp />    
                 <mycustomthirdcmp/>   
                 <test_alias_cmp/> 
@@ -31,16 +39,25 @@ impl Component for MyCmp {
 }
 
 impl MyCmp {
-    pub fn test(&self) -> String {
-        String::from("test_class")
+    pub fn test(&self) -> String { 
+        self.name.clone()
     } 
+
+    pub fn change_name(&mut self) {
+        fraw_state! { (self) => {
+            name: String::from("test_name"),
+            id: 1000
+        } } 
+    }
 }
 
 fn main() {
     Fraw::register_alias("my_test", "my-test");
     Fraw::register_alias("test_alias_cmp", "mysecondcmp");
 
-    let fraw = Fraw::init("body", Box::new(MyCmp{}));
+    let mut cmp = Box::new(MyCmp{id: 0, name: String::from("")});
+    cmp.change_name();
+    let fraw = Fraw::init("body", cmp);
 
     fraw.run();
 }

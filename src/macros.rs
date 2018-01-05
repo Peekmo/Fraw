@@ -62,9 +62,18 @@ macro_rules! view {
 
         view! { $component, dom, nodes($($tree)*) }
     }};
-    // Init component
+}
+
+#[macro_export]
+/// Modify component state
+macro_rules! fraw_state {
+    // (self) => {key: value}
+    (($component:ident) => {$($key:ident : $value:expr),*}) => {{
+        $($component.$key = $value;)*
+    }};
+    // Error
     ($($tree:tt)*) => {{
-        view! { $($tree)* }
+        panic!("Invalid state declaration ! It's fraw_state! { (self) => {key: value, key:value, ...} }");
     }};
 }
 
