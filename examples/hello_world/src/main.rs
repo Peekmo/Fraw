@@ -29,6 +29,7 @@ impl Component for MyCmp {
                     class={ self.test().as_str() } 
                     id={ self.id.to_string().as_str() }
                     name="test"
+                    (click)={|| self.onclick()}
                 ></my_test>
                 <mysecondcmp />    
                 <mycustomthirdcmp/>   
@@ -48,6 +49,16 @@ impl MyCmp {
             name: String::from("test_name"),
             id: 1000
         } } 
+    }
+
+    pub fn onclick(&self) {
+        println!("ok");
+        /*fraw_state! { (self) => {
+            name: String::from("clicked"),
+            id: 9999
+        } };
+
+        self.render();*/
     }
 }
 

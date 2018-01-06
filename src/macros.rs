@@ -38,6 +38,12 @@ macro_rules! view {
 
         view! { $component, $dom, $nodes($($tree)*) }
     };
+    // Listener
+    ($component:ident, $dom:ident, $nodes:ident (($key:ident) = {$value:expr} $($tree:tt)*)) => {
+        //$value();
+
+        view! { $component, $dom, $nodes($($tree)*) }
+    };
     // Attribute
     ($component:ident, $dom:ident, $nodes:ident ($key:ident = $value:tt $($tree:tt)*)) => {
         $crate::macros::Attribute::process(&$value, $component, &mut $nodes, stringify!($key));
@@ -99,26 +105,36 @@ pub fn close_tag(component: &FrawComponent, nodes: &mut Vec<Tag>, dom: &mut Vec<
                }
            }
            
-
            // Check for component
            match component.dependencies().get(&String::from(tag_name)) {
+               None => {},
                Some(component) => {
                    // Put the tag and remove it, in order to get the tag in the DOM
                    nodes.push(last_tag);
 
-                   Expression::process(&component.render(), nodes);
+                   process_subtemplate(component.render(), nodes);
 
                    last_tag = nodes.pop().unwrap();
                },
-               None => {}
            }
 
+           // Put children or fill the DOM
            if !nodes.is_empty() {
-               nodes.last_mut().unwrap().add_child(last_tag);
+               nodes.last_mut().unwrap().add_child(Box::new(last_tag));
            } else {
                dom.push(last_tag);
            }
        }
+    }
+}
+
+/// Subtemplate
+fn process_subtemplate(tag: Tag, nodes: &mut Vec<Tag>) {
+    match nodes.last_mut() {
+        None => panic!("Can't write expression outside a tag"),
+        Some(last_tag) => {
+            last_tag.add_child(Box::new(tag));
+        }
     }
 }
 
@@ -135,18 +151,6 @@ impl Expression for str {
             None => panic!("Can't write expression outside a tag"),
             Some(last_tag) => {
                 last_tag.set_inner_html(self);
-            }
-        }
-    }
-}
-
-/// Subtemplate
-impl Expression for Tag {
-    fn process(&self, nodes: &mut Vec<Tag>) {
-        match nodes.last_mut() {
-            None => panic!("Can't write expression outside a tag"),
-            Some(last_tag) => {
-                last_tag.add_child(self.clone());
             }
         }
     }

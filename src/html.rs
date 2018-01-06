@@ -8,7 +8,7 @@ use std::collections::HashMap;
 /// HTML Tag representation
 pub struct Tag {
     pub tag: &'static str,
-    children: Vec<Tag>,
+    children: Vec<Box<Tag>>,
     attributes: HashMap<String, String>,
     inner_html: Option<String>
 }
@@ -61,13 +61,17 @@ impl Tag {
     }
 
     /// Add a tag as a child of the current tag
-    pub fn add_child(&mut self, tag: Tag) {
+    pub fn add_child(&mut self, tag: Box<Tag>) {
         if let Some(ref text) = self.inner_html {
             panic!("Impossible to add children to a node with expression ({})", text);    
         }
 
         self.children.push(tag);
     }
+}
+
+pub trait Listener {
+    fn build(&mut self, tag: &Tag);
 }
 
 
