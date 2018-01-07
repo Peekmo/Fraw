@@ -29,7 +29,7 @@ impl Component for MyCmp {
                     class={ self.test().as_str() } 
                     id={ self.id.to_string().as_str() }
                     name="test"
-                    (click)={|| self.onclick()}
+                    (click)={|| MyCmp::onclick()}
                 ></my_test>
                 <mysecondcmp />    
                 <mycustomthirdcmp/>   
@@ -51,7 +51,7 @@ impl MyCmp {
         } } 
     }
 
-    pub fn onclick(&self) {
+    pub fn onclick() {
         println!("ok");
         /*fraw_state! { (self) => {
             name: String::from("clicked"),

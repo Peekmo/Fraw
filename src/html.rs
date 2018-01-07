@@ -2,14 +2,14 @@ use stdweb::web::document;
 use stdweb::web::Element;
 use stdweb::web::INode;
 use std::collections::HashMap;
+use std::fmt;
 
-#[derive(Clone)]
-#[derive(Debug)]
 /// HTML Tag representation
 pub struct Tag {
     pub tag: &'static str,
     children: Vec<Box<Tag>>,
     attributes: HashMap<String, String>,
+    listeners: HashMap<String, Box<Fn()>>,
     inner_html: Option<String>
 }
 
@@ -21,6 +21,7 @@ impl Tag {
             tag: tag, 
             children: Vec::new(), 
             attributes: HashMap::new(),
+            listeners: HashMap::new(),
             inner_html: None 
         }
     }
@@ -68,10 +69,10 @@ impl Tag {
 
         self.children.push(tag);
     }
-}
 
-pub trait Listener {
-    fn build(&mut self, tag: &Tag);
+    pub fn add_listener(&mut self, name: &str, listener: Box<Fn()>) {
+        self.listeners.insert(String::from(name), listener);
+    }
 }
 
 
