@@ -29,7 +29,7 @@ impl Component for MyCmp {
                     class={ self.test().as_str() } 
                     id={ self.id.to_string().as_str() }
                     name="test"
-                    (click)={|| MyCmp::onclick()}
+                    (click)={ || println!("test") }
                 ></my_test>
                 <mysecondcmp />    
                 <mycustomthirdcmp/>   

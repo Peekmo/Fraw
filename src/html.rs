@@ -1,15 +1,16 @@
 use stdweb::web::document;
 use stdweb::web::Element;
 use stdweb::web::INode;
+use stdweb::web::IEventTarget;
+use stdweb::web::event::ClickEvent;
 use std::collections::HashMap;
-use std::fmt;
 
 /// HTML Tag representation
 pub struct Tag {
     pub tag: &'static str,
     children: Vec<Box<Tag>>,
     attributes: HashMap<String, String>,
-    listeners: HashMap<String, Box<Fn()>>,
+    listeners: HashMap<String, Box<Listener>>,
     inner_html: Option<String>
 }
 
@@ -33,6 +34,11 @@ impl Tag {
         // @todo Not implemented yet by stdweb
         for (name, value) in self.attributes.iter() {
             js!( @{&element}.setAttribute(@{name.as_str()}, @{value.as_str()}); );
+        }
+
+        // Listeners
+        for (event, closure) in self.listeners.iter() {
+            closure.register(&element);
         }
 
         match self.inner_html {
@@ -70,9 +76,29 @@ impl Tag {
         self.children.push(tag);
     }
 
-    pub fn add_listener(&mut self, name: &str, listener: Box<Fn()>) {
+    pub fn add_listener(&mut self, name: &str, listener: Box<Listener>) {
         self.listeners.insert(String::from(name), listener);
     }
 }
 
+pub trait Listener {
+    fn register(&self, element: &Element);
+}
 
+pub struct ListenerContainer<F> {
+    handler: F
+}
+
+impl<F> ListenerContainer<F>
+where F: Fn() {
+    pub fn new(handler: F) -> Self {
+        ListenerContainer{handler}
+    }
+}
+
+impl<F> Listener for ListenerContainer<F> 
+where F: Fn() {
+    fn register(&self, element: &Element) {
+        element.add_event_listener(move |_: ClickEvent| { println!("ok"); });
+    }
+}

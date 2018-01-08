@@ -40,7 +40,7 @@ macro_rules! view {
     };
     // Listener
     ($component:ident, $dom:ident, $nodes:ident (($key:ident) = {$value:expr} $($tree:tt)*)) => {
-        $nodes.last_mut().unwrap().add_listener(stringify!($key), Box::new($value));
+        $nodes.last_mut().unwrap().add_listener(stringify!($key), Box::new($crate::html::ListenerContainer::new($value)));
 
         view! { $component, $dom, $nodes($($tree)*) }
     };
